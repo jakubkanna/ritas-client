@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ReactPlayer from "react-player/lazy";
 import { VideoRefSchema } from "@jakubkanna/labguy-front-schema";
 
@@ -25,7 +25,6 @@ export default function Video({
   const [ready, setReady] = useState(false);
 
   const { playing, muted, controls, light } = playerProps;
-  useEffect(() => console.log(videoUrl), [videoUrl]);
 
   if (!videoUrl) return null;
 
@@ -35,12 +34,15 @@ export default function Video({
     height: 0,
     overflow: "hidden",
     maxWidth: "100%",
+    width: "100%",
   };
 
   const playerStyle: React.CSSProperties = {
     position: "absolute",
-    top: 0,
-    left: 0,
+    inset: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     width: "100%",
     height: "100%",
   };
@@ -62,6 +64,7 @@ export default function Video({
           onReady={() => setReady(true)}
           width="100%"
           height="100%"
+          style={{ margin: "0 auto" }}
         />
       </div>
     </div>
