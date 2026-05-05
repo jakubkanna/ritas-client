@@ -4,6 +4,7 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 // import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
+  base: "/ritas-client/",
   assetsInclude: ["**/*.gltf"],
   plugins: [
     react(),
