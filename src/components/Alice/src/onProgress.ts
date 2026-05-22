@@ -21,21 +21,18 @@ const onProgress = (modelViewer: ModelViewerElement | null) => {
 
     // Assuming event is a CustomEvent with a 'detail' property containing totalProgress
     const customEvent = event as CustomEvent<{ totalProgress: number }>;
-    const progress = customEvent.detail.totalProgress;
+    const totalProgress = customEvent.detail.totalProgress;
 
     // Update the width of the bar
     // updatingBar.style.width = `${progress * 100}%`;
 
     // Update the progress value text
-    progressValue.textContent = `${(progress * 100).toFixed(0)}%`;
+    progressValue.textContent = `${(totalProgress * 100).toFixed(0)}%`;
 
     // Hide progress bar and remove event listener when loading is complete
-    if (progress === 1) {
+    if (totalProgress === 1) {
       progressBar.classList.add("hide");
-      target.removeEventListener(
-        "progress",
-        progress as unknown as EventListener
-      );
+      target.removeEventListener("progress", progress as EventListener);
     } else {
       progressBar.classList.remove("hide");
     }

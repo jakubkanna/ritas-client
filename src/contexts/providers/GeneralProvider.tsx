@@ -2,7 +2,7 @@ import { ReactNode, useState, useMemo, useEffect } from "react";
 import LoadingPage from "../../pages/Loading";
 import { GeneralContext, Preferences } from "../GeneralContext";
 import { SITE_OWNER_NAME, STATIC_PREFERENCES } from "../../config/staticSite";
-import { buildApiUrl } from "../../config/api";
+import { getApiBaseUrl } from "../../config/api";
 
 interface GeneralProviderProps {
   children: ReactNode;
@@ -18,7 +18,7 @@ export const GeneralProvider: React.FC<GeneralProviderProps> = ({
 
   const fetchPreferences = useMemo(() => {
     const fetchPreferencesFromServer = async () => {
-      const apiUrl = buildApiUrl("");
+      const apiUrl = getApiBaseUrl();
 
       if (!apiUrl) {
         setPreferences(STATIC_PREFERENCES);
@@ -28,36 +28,13 @@ export const GeneralProvider: React.FC<GeneralProviderProps> = ({
         return;
       }
 
-      try {
-        const response = await fetch(apiUrl);
-
-        if (!response.ok) {
-          if (response.status === 429) {
-            setStatus(429);
-          } else {
-            throw new Error(
-              `Error fetching preferences: ${response.statusText}`
-            );
-          }
-        } else {
-          setPreferences({
-            ...STATIC_PREFERENCES,
-            artists_name: SITE_OWNER_NAME,
-          });
-          setApiConnected(true);
-          setStatus(null);
-        }
-      } catch (error: unknown) {
-        console.warn(
-          "Using static site data because the API is unavailable.",
-          error
-        );
-        setPreferences(STATIC_PREFERENCES);
-        setApiConnected(false);
-        setStatus(null);
-      } finally {
-        setLoading(false);
-      }
+      setPreferences({
+        ...STATIC_PREFERENCES,
+        artists_name: SITE_OWNER_NAME,
+      });
+      setApiConnected(true);
+      setStatus(null);
+      setLoading(false);
     };
 
     return fetchPreferencesFromServer;

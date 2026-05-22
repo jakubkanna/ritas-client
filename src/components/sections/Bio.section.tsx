@@ -4,12 +4,10 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight } from "react-bootstrap-icons";
 import SectionModal from "../SectionModal";
 import Bio from "../../pages/single/Bio";
-import { useEffect } from "react";
 import HTMLReactParser from "html-react-parser/lib/index";
 
 export default function BioSec() {
   const { data } = useFetchData<ProfileSchema>("pages/about");
-  useEffect(() => console.log("biosection"), []);
 
   if (!data) return null;
 
