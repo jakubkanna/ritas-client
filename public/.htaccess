@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Let WordPress and real files/directories handle their own requests.
+  RewriteRule ^wp-admin/ - [L]
+  RewriteRule ^wp-content/ - [L]
+  RewriteRule ^wp-includes/ - [L]
+  RewriteRule ^wp-json/ - [L]
+  RewriteRule ^index\.php$ - [L]
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # React Router fallback for direct visits to client-side routes.
+  RewriteRule . index.html [L]
+</IfModule>

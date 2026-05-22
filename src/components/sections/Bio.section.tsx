@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import HTMLReactParser from "html-react-parser/lib/index";
 
 export default function BioSec() {
-  const { data } = useFetchData<ProfileSchema>("profile/1");
+  const { data } = useFetchData<ProfileSchema>("pages/about");
   useEffect(() => console.log("biosection"), []);
 
   if (!data) return null;

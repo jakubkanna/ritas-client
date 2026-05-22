@@ -1,0 +1,3 @@
+# Generate sitemap once per month at 03:15 on the first day of the month.
+# Replace APP_DIR and PUBLIC_DIR with the server paths before installing.
+15 3 1 * * APP_DIR=/home/USER/ritas-client PUBLIC_DIR=/home/USER/public_html /bin/sh /home/USER/ritas-client/scripts/generate-sitemap-monthly.sh >> /tmp/ritas-client-sitemap-cron.log 2>&1

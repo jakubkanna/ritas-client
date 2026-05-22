@@ -2,6 +2,7 @@ import { ReactNode, useState, useMemo, useEffect } from "react";
 import LoadingPage from "../../pages/Loading";
 import { GeneralContext, Preferences } from "../GeneralContext";
 import { SITE_OWNER_NAME, STATIC_PREFERENCES } from "../../config/staticSite";
+import { buildApiUrl } from "../../config/api";
 
 interface GeneralProviderProps {
   children: ReactNode;
@@ -17,18 +18,15 @@ export const GeneralProvider: React.FC<GeneralProviderProps> = ({
 
   const fetchPreferences = useMemo(() => {
     const fetchPreferencesFromServer = async () => {
-      const endpoint = "/preferences";
-      const baseApiUrl = import.meta.env.VITE_SERVER_API_URL;
+      const apiUrl = buildApiUrl("");
 
-      if (!baseApiUrl) {
+      if (!apiUrl) {
         setPreferences(STATIC_PREFERENCES);
         setApiConnected(false);
         setStatus(null);
         setLoading(false);
         return;
       }
-
-      const apiUrl = `${baseApiUrl}${endpoint}`;
 
       try {
         const response = await fetch(apiUrl);
@@ -42,14 +40,8 @@ export const GeneralProvider: React.FC<GeneralProviderProps> = ({
             );
           }
         } else {
-          const contentType = response.headers.get("content-type");
-          if (!contentType?.includes("application/json")) {
-            throw new Error("Preferences response was not JSON.");
-          }
-
-          const data = await response.json();
           setPreferences({
-            ...data,
+            ...STATIC_PREFERENCES,
             artists_name: SITE_OWNER_NAME,
           });
           setApiConnected(true);

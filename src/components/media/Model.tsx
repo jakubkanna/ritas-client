@@ -47,14 +47,16 @@ export default function Model({
         const progress = event.detail.totalProgress || 0;
         setProgress(progress);
       }) as EventListener;
+      const handleLoad = () => setProgress(100);
 
       // Add both progress and load events
       (modelViewer as unknown as HTMLElement).addEventListener(
         "progress",
         handleProgress
       );
-      (modelViewer as unknown as HTMLElement).addEventListener("load", () =>
-        setProgress(100)
+      (modelViewer as unknown as HTMLElement).addEventListener(
+        "load",
+        handleLoad
       );
 
       return () => {
@@ -64,7 +66,7 @@ export default function Model({
         );
         (modelViewer as unknown as HTMLElement).removeEventListener(
           "load",
-          () => setProgress(100)
+          handleLoad
         );
       };
     }

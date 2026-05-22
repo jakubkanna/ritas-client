@@ -1,54 +1,81 @@
-import { Cloudinary } from "@cloudinary/url-gen";
-import { scale } from "@cloudinary/url-gen/actions/resize";
 import { ImageRefSchema } from "@jakubkanna/labguy-front-schema";
 
-// Global sizes for responsive images
-const sizes = {
-  SMALL: 400,
-  MEDIUM: 800,
-  BIG: 1600,
-  FULL: 2160,
+type WordPressImageSize = {
+  source_url?: string;
+  width?: number;
 };
 
-// Cloudinary URL generator with a specific width
-function getCldUrl(public_id: string, width: number) {
-  const cld = new Cloudinary({
-    cloud: {
-      cloudName: import.meta.env.VITE_CLD_CLOUD_NAME,
-    },
-  });
+type WordPressImage = ImageRefSchema & {
+  url?: string;
+  source_url?: string;
+  guid?: {
+    rendered?: string;
+  };
+  media_details?: {
+    sizes?: Record<string, WordPressImageSize>;
+  };
+  alt_text?: string;
+  caption?: {
+    rendered?: string;
+  };
+};
 
-  const myImage = cld.image(public_id);
-  myImage.resize(scale().width(width));
-  return myImage.toURL();
-}
+const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value);
 
-// Generate srcSet for responsive image loading
-function getSrcSet(public_id: string) {
+const joinUrl = (baseUrl: string, path: string) =>
+  `${baseUrl.replace(/\/+$/g, "")}/${path.replace(/^\/+/g, "")}`;
+
+const WORDPRESS_UPLOADS_PATH = "wp-content/uploads";
+
+const getWordPressOrigin = () => {
+  const apiUrl = import.meta.env.VITE_SERVER_API_URL?.trim();
+
+  if (!apiUrl || !isAbsoluteUrl(apiUrl)) return "";
+
+  return new URL(apiUrl).origin;
+};
+
+const resolveMediaUrl = (path?: string | null) => {
+  if (!path) return "";
+  if (isAbsoluteUrl(path) || path.startsWith("/")) return path;
+
+  return joinUrl(
+    getWordPressOrigin()
+      ? joinUrl(getWordPressOrigin(), WORDPRESS_UPLOADS_PATH)
+      : `/${WORDPRESS_UPLOADS_PATH}`,
+    path
+  );
+};
+
+const getWordPressSrcSet = (image: WordPressImage) => {
+  const sizes = image.media_details?.sizes;
+
+  if (!sizes) return "";
+
   return Object.values(sizes)
-    .map((width) => `${getCldUrl(public_id, width)} ${width}w`)
+    .filter((size) => size.source_url && size.width)
+    .map((size) => `${size.source_url} ${size.width}w`)
     .join(", ");
-}
+};
 
-// Get Image attributes based on Cloudinary availability
+const getWordPressImageUrl = (image: WordPressImage) =>
+  image.url ||
+  image.source_url ||
+  image.guid?.rendered ||
+  resolveMediaUrl(
+    image.path && image.filename && !image.path.endsWith(image.filename)
+      ? joinUrl(image.path, image.filename)
+      : image.path || image.filename
+  );
+
 export function getImageAttributes(image: ImageRefSchema) {
-  const { public_id } = image;
+  const wpImage = image as WordPressImage;
 
-  if (public_id) {
-    return {
-      src: getCldUrl(public_id, sizes.MEDIUM),
-      srcSet: getSrcSet(public_id),
-      sizes: `(max-width: 600px) ${sizes.SMALL}px, (max-width: 1200px) ${sizes.MEDIUM}px, (max-width: 1600px) ${sizes.BIG}px, ${sizes.FULL}px`,
-      alt: image.description || "Image",
-    };
-  }
-
-  // Non-Cloudinary image or missing data fallback
   return {
-    src: "",
-    srcSet: "",
-    sizes: "",
-    alt: "",
+    src: getWordPressImageUrl(wpImage),
+    srcSet: getWordPressSrcSet(wpImage),
+    sizes: "(max-width: 768px) 100vw, 1200px",
+    alt: wpImage.alt_text || wpImage.description || "Image",
   };
 }
 export interface Padding {

@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 import handleFetchError from "../utils/handleFetchError";
+import { buildApiUrl } from "../config/api";
+import {
+  resolveWordPressPath,
+  transformWordPressResponse,
+} from "../utils/wordpress";
 
 export const useFetchData = <T,>(path: string) => {
   const [data, setData] = useState<T | null>(null);
@@ -8,9 +13,10 @@ export const useFetchData = <T,>(path: string) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const baseApiUrl = import.meta.env.VITE_SERVER_API_URL;
+      const apiPath = resolveWordPressPath(path);
+      const apiUrl = buildApiUrl(apiPath);
 
-      if (!baseApiUrl) {
+      if (!apiUrl) {
         setData(null);
         setLoading(false);
         return;
@@ -20,7 +26,7 @@ export const useFetchData = <T,>(path: string) => {
       setError(null);
 
       try {
-        const response = await fetch(`${baseApiUrl}/${path}`);
+        const response = await fetch(apiUrl);
         if (!response.ok) {
           throw new Error(handleFetchError(response.status));
         }
@@ -29,8 +35,8 @@ export const useFetchData = <T,>(path: string) => {
           throw new Error("API response was not JSON.");
         }
 
-        const result: T = await response.json();
-        setData(result);
+        const result = await response.json();
+        setData(transformWordPressResponse<T>(path, result));
       } catch (err) {
         setError(
           (err as Error).message || "An error occurred while fetching data."

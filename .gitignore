@@ -25,3 +25,6 @@ dist-ssr
 
 # labguy
 .env
+.env.*
+!.env.example
+!.env.wordpress.example

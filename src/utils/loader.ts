@@ -1,19 +1,22 @@
 import handleFetchError from "./handleFetchError";
+import { buildApiUrl } from "../config/api";
+import { resolveWordPressPath, transformWordPressResponse } from "./wordpress";
 
 export const fetchData = async <T>(path: string): Promise<T> => {
-  const baseApiUrl = import.meta.env.VITE_SERVER_API_URL;
+  const apiPath = resolveWordPressPath(path);
+  const apiUrl = buildApiUrl(apiPath);
 
-  if (!baseApiUrl) {
+  if (!apiUrl) {
     throw new Error("API is not configured.");
   }
 
-  const response = await fetch(`${baseApiUrl}/${path}`);
+  const response = await fetch(apiUrl);
   if (!response.ok) handleFetchError(response.status);
   const contentType = response.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
     throw new Error("API response was not JSON.");
   }
 
-  const data: T = await response.json();
-  return data;
+  const data = await response.json();
+  return transformWordPressResponse<T>(path, data);
 };

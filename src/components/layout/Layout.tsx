@@ -6,6 +6,10 @@ import { Helmet } from "react-helmet";
 import { ProfileSchema } from "@jakubkanna/labguy-front-schema";
 import { SITE_OWNER_NAME } from "../../config/staticSite";
 
+const DEFAULT_DESCRIPTION = "Rita Borralho Silva portfolio and works.";
+const DEFAULT_META_IMAGE =
+  "https://white-hawk-279904.hostingersite.com/alice/alice_10.jpg";
+
 export default function Layout({
   children,
   title,
@@ -25,7 +29,7 @@ export default function Layout({
 
   const metadata = {
     title: title || artistsName,
-    description: description,
+    description: description || DEFAULT_DESCRIPTION,
     name: artistsName,
   };
 
@@ -36,6 +40,23 @@ export default function Layout({
         <title>{metadata.title}</title>
         <meta name="description" content={metadata.description} />
         <meta name="author" content={metadata.name} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={metadata.name} />
+        <meta property="og:title" content={metadata.title} />
+        <meta property="og:description" content={metadata.description} />
+        <meta property="og:image" content={DEFAULT_META_IMAGE} />
+        <meta property="og:image:secure_url" content={DEFAULT_META_IMAGE} />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1508" />
+        <meta property="og:image:height" content="1391" />
+        <meta
+          property="og:image:alt"
+          content="Rita Borralho Silva 3D model preview"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metadata.title} />
+        <meta name="twitter:description" content={metadata.description} />
+        <meta name="twitter:image" content={DEFAULT_META_IMAGE} />
       </Helmet>
       <Fade in={true} appear={true}>
         <div>

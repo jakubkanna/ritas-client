@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url"; // Import fileURLToPath to convert URL to path
+import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: process.env.DOTENV_CONFIG_PATH || ".env" });
 
 // Static routes (no dynamic slugs)
 const staticRoutes = [
@@ -14,11 +14,21 @@ const staticRoutes = [
   // "/projects",
 ];
 
-// Assuming you have a function to fetch dynamic slugs for posts, projects, etc.
-const fetchSlugs = async (routeType) => {
+const buildApiUrl = (baseUrl, pathName) => {
+  const siteUrl = process.env.WP_SITE_URL || process.env.SITE_URL || process.env.BASE_URL;
+  const absoluteBase =
+    baseUrl.startsWith("/") && siteUrl
+      ? `${siteUrl.replace(/\/+$/g, "")}${baseUrl}`
+      : baseUrl;
+  const cleanBase = absoluteBase.replace(/\/+$/g, "");
+  const cleanPath = pathName.replace(/^\/+|\/+$/g, "");
+
+  return `${cleanBase}/${cleanPath}`;
+};
+
+const fetchPostSlugs = async () => {
   const apiUrl = process.env.VITE_SERVER_API_URL;
 
-  // Ensure the API URL is defined
   if (!apiUrl) {
     throw new Error(
       "VITE_SERVER_API_URL is not defined in environment variables"
@@ -26,48 +36,40 @@ const fetchSlugs = async (routeType) => {
   }
 
   try {
-    // Define the endpoint for fetching general sections
-    const endpoint = `${apiUrl}/general`;
+    const endpoint = buildApiUrl(apiUrl, "posts?per_page=100&_fields=slug");
 
-    // Perform the fetch request
     const response = await fetch(endpoint, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json", // Set the expected response content type
-      },
+      headers: { "Content-Type": "application/json" },
     });
 
-    // Check if the response is okay (status 200-299)
     if (!response.ok) {
       throw new Error(
         `Failed to fetch data from ${endpoint}: ${response.statusText}`
       );
     }
 
-    // Parse the response JSON
     const data = await response.json();
-
-    // Filter by the specified routeType and extract slugs
-    const slugs = data
-      .filter((item) => item[routeType]) // Check if the routeType key exists in the item
-      .map((item) => item.slug); // Extract the slug property
-
-    return slugs;
+    return data.map((item) => item.slug);
   } catch (error) {
     console.error("Error fetching slugs:", error);
-    return []; // Return an empty array on error
+    return [];
   }
 };
 
 // Function to generate the sitemap XML
 const generateSitemap = async () => {
   // Get dynamic slugs
-  const postSlugs = await fetchSlugs("post");
-  const projectSlugs = await fetchSlugs("project");
-  const workSlugs = await fetchSlugs("work");
+  const workSlugs = await fetchPostSlugs();
 
   // Get the base URL from environment variables
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.SITE_URL || process.env.BASE_URL;
+
+  if (!baseUrl) {
+    throw new Error(
+      "SITE_URL or BASE_URL is not defined in environment variables"
+    );
+  }
 
   // Start sitemap structure
   let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -78,33 +80,20 @@ const generateSitemap = async () => {
     sitemap += `  <url>\n    <loc>${baseUrl}${route}</loc>\n  </url>\n`;
   });
 
-  // Add dynamic routes for posts
   workSlugs.forEach((slug) => {
     sitemap += `  <url>\n    <loc>${baseUrl}/${slug}</loc>\n  </url>\n`;
-  });
-
-  // Add dynamic routes for projects
-  projectSlugs.forEach((slug) => {
-    sitemap += `  <url>\n    <loc>${baseUrl}/projects/${slug}</loc>\n  </url>\n`;
-  });
-
-  // Add dynamic routes for works
-  postSlugs.forEach((slug) => {
-    sitemap += `  <url>\n    <loc>${baseUrl}/works/${slug}</loc>\n  </url>\n`;
   });
 
   // Close URL set
   sitemap += "</urlset>\n";
 
-  // Get the current directory path using import.meta.url (ES Module way)
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const outputPath =
+    process.env.SITEMAP_OUTPUT_PATH ||
+    path.join(__dirname, "../../", "public", "sitemap.xml");
 
-  // Write the sitemap to a file
-  fs.writeFileSync(
-    path.join(__dirname, "../../", "public", "sitemap.xml"),
-    sitemap
-  );
-  console.debug("Sitemap generated: " + "public/sitemap.xml");
+  fs.writeFileSync(outputPath, sitemap);
+  console.debug("Sitemap generated: " + outputPath);
 };
 
 // Call the function to generate the sitemap
