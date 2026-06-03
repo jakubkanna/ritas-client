@@ -14,7 +14,20 @@ export default function Work() {
 
   if (!data) return <NotFoundPage />;
 
-  const { general, dimensions, medium, year, media, urls, description } = data;
+  const {
+    general,
+    dimensions,
+    medium,
+    technique,
+    year,
+    media,
+    urls,
+    description,
+  } = data;
+  const displayedTechnique = technique || medium;
+  const details = [dimensions, displayedTechnique, year].filter(
+    (detail) => detail !== undefined && detail !== null && detail !== ""
+  );
 
   if (!general.published) return "This page is private.";
 
@@ -27,9 +40,12 @@ export default function Work() {
             <Row className="w-100">
               <Col xs={12}>
                 <p id="Details">
-                  {dimensions && <span>{dimensions}, </span>}
-                  {medium && <span>{medium}, </span>}
-                  {year && <span>{year}</span>}
+                  {details.map((detail, index) => (
+                    <span key={`${detail}-${index}`}>
+                      {detail}
+                      {index < details.length - 1 && ", "}
+                    </span>
+                  ))}
                   {urls && (
                     <>
                       <br />

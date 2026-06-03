@@ -4,11 +4,11 @@ import { GeneralContext } from "../../contexts/GeneralContext";
 import { Helmet } from "react-helmet";
 
 import { ProfileSchema } from "@jakubkanna/labguy-front-schema";
+import { PRODUCTION_SITE_URL } from "../../config/api";
 import { SITE_OWNER_NAME } from "../../config/staticSite";
 
 const DEFAULT_DESCRIPTION = "Rita Borralho Silva portfolio and works.";
-const DEFAULT_META_IMAGE =
-  "https://white-hawk-279904.hostingersite.com/alice/alice_10.jpg";
+const DEFAULT_META_IMAGE = `${PRODUCTION_SITE_URL}/alice/alice_10.jpg`;
 
 export default function Layout({
   children,

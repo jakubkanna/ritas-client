@@ -1,4 +1,5 @@
 import { ImageRefSchema } from "@jakubkanna/labguy-front-schema";
+import { getWordPressOrigin } from "../config/api";
 
 type WordPressImageSize = {
   source_url?: string;
@@ -26,14 +27,6 @@ const joinUrl = (baseUrl: string, path: string) =>
   `${baseUrl.replace(/\/+$/g, "")}/${path.replace(/^\/+/g, "")}`;
 
 const WORDPRESS_UPLOADS_PATH = "wp-content/uploads";
-
-const getWordPressOrigin = () => {
-  const apiUrl = import.meta.env.VITE_SERVER_API_URL?.trim();
-
-  if (!apiUrl || !isAbsoluteUrl(apiUrl)) return "";
-
-  return new URL(apiUrl).origin;
-};
 
 const resolveMediaUrl = (path?: string | null) => {
   if (!path) return "";

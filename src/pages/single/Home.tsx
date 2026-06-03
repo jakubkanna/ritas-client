@@ -11,7 +11,7 @@ import BioSec from "../../components/sections/Bio.section";
 import { Alice } from "../../components/Alice/Alice";
 
 export default function Homepage() {
-  const { preferences, apiConnected } = useContext(GeneralContext);
+  const { preferences } = useContext(GeneralContext);
   const location = useLocation();
 
   useEffect(() => {
@@ -32,27 +32,23 @@ export default function Homepage() {
           <Alice />
         </Section>
         <div id="sections">
-          {apiConnected && (
-            <>
-              <Section id="bio">
-                <Section.Layout title="Bio" body={<BioSec />} />
-              </Section>
-              <Section id="works">
-                <Section.Layout
-                  title="Works"
-                  subtitle={
-                    <Link to={"#works"}>
-                      View full selection <ArrowUpRight />
-                    </Link>
-                  }
-                  body={<WorksSecContent />}
-                />
-              </Section>
-              <Section id="contact">
-                <Section.Layout title="Contact" body={<ContactSec />} />
-              </Section>
-            </>
-          )}
+          <Section id="bio">
+            <Section.Layout title="Bio" body={<BioSec />} />
+          </Section>
+          <Section id="works">
+            <Section.Layout
+              title="Works"
+              subtitle={
+                <Link to={"#works"}>
+                  View full selection <ArrowUpRight />
+                </Link>
+              }
+              body={<WorksSecContent />}
+            />
+          </Section>
+          <Section id="contact">
+            <Section.Layout title="Contact" body={<ContactSec />} />
+          </Section>
         </div>
       </Col>
     </Layout>

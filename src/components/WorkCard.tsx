@@ -43,9 +43,10 @@ const Hover = styled.div<{ color: string }>`
 `;
 
 const WorkCard: React.FC<CardProps> = ({ work }) => {
-  const { general, dimensions, year, media, medium } = work;
+  const { general, dimensions, year, media, medium, technique } = work;
   const { title, slug } = general;
   const [mouveOver, setMouseOver] = useState<boolean>(false);
+  const displayedTechnique = technique || medium;
 
   const color = getRitasColor();
 
@@ -87,9 +88,9 @@ const WorkCard: React.FC<CardProps> = ({ work }) => {
                   <br />
                 </>
               )}
-              {medium && (
+              {displayedTechnique && (
                 <>
-                  <span>{medium} </span>
+                  <span>{displayedTechnique} </span>
                   <br />
                 </>
               )}
