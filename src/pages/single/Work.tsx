@@ -26,7 +26,7 @@ export default function Work() {
   } = data;
   const displayedTechnique = technique || medium;
   const details = [dimensions, displayedTechnique, year].filter(
-    (detail) => detail !== undefined && detail !== null && detail !== ""
+    (detail) => detail !== undefined && detail !== null && detail !== "",
   );
 
   if (!general.published) return "This page is private.";
@@ -67,7 +67,9 @@ export default function Work() {
           {description && (
             <Row>
               <Col>
-                <p id="description">{HTMLReactParser(description)}</p>
+                <div id="description" className="work-description">
+                  {HTMLReactParser(description)}
+                </div>
               </Col>
             </Row>
           )}

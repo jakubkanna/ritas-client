@@ -72,15 +72,24 @@ const getTextField = (post: WordPressPost, key: string) => {
   return text || undefined;
 };
 
+const getYearFromDate = (value?: string) => {
+  if (!value) return undefined;
+
+  const match = value.match(/^(\d{4})/);
+  const year = match ? Number(match[1]) : NaN;
+
+  return Number.isInteger(year) ? year : undefined;
+};
+
 const getYearField = (post: WordPressPost) => {
   const value = getField<string | number>(post, "year");
 
   if (typeof value === "number") return value;
-  if (typeof value !== "string") return undefined;
+  if (typeof value !== "string") return getYearFromDate(post.date);
 
   const text = value.trim();
 
-  if (!text) return undefined;
+  if (!text) return getYearFromDate(post.date);
 
   const numericYear = Number(text);
 

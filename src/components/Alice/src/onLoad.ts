@@ -1,15 +1,31 @@
 import { ModelViewerElement } from "@google/model-viewer";
 import video from "/alice/Alice_RitaBorralhoSilva.mp4";
 
-export default function onLoad(modelViewer: ModelViewerElement | null) {
-  if (!modelViewer) return;
-  modelViewer.addEventListener("load", async () => {
+export default function onLoad(
+  modelViewer: ModelViewerElement | null,
+  onReady?: () => void
+) {
+  if (!modelViewer) return undefined;
+
+  const revealModel = () => {
+    modelViewer.updateFraming();
+    requestAnimationFrame(() => {
+      modelViewer.dismissPoster();
+      requestAnimationFrame(() => onReady?.());
+    });
+  };
+
+  const handleLoad = () => {
     // basic material setup
 
     const ritasColor = "#b9d1db";
     const { materials } = modelViewer.model || {};
 
-    if (!materials) return;
+    if (!materials) {
+      revealModel();
+      return;
+    }
+
     modelViewer.timeScale = 0.15;
 
     materials[0].pbrMetallicRoughness.setBaseColorFactor(ritasColor);
@@ -22,19 +38,15 @@ export default function onLoad(modelViewer: ModelViewerElement | null) {
 
     const { baseColorTexture } = material.pbrMetallicRoughness;
     baseColorTexture.setTexture(videoTexture);
+    revealModel();
 
-    // Check scroll position on load and scroll events
-    const updateBlur = () => {
-      const modelElement = document.getElementById("model");
-      if (modelElement) {
-        if (window.scrollY > 0) {
-          modelElement.classList.add("blur");
-        } else {
-          modelElement.classList.remove("blur");
-        }
-      }
-    };
+  };
 
-    updateBlur(); // Check on load
-  });
+  modelViewer.addEventListener("load", handleLoad);
+
+  if (modelViewer.loaded) {
+    handleLoad();
+  }
+
+  return () => modelViewer.removeEventListener("load", handleLoad);
 }

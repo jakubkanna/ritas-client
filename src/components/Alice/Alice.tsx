@@ -17,12 +17,23 @@ import VideoWindow from "./Modal";
 export const Alice = () => {
   const aliceRef = useRef(null);
   const [show, setShow] = useState(false);
+  const [modelReady, setModelReady] = useState(false);
+  const [isBlurred, setIsBlurred] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.scrollY >= window.innerHeight / 100
+  );
 
   useEffect(() => {
     const modelViewer = document.getElementById("alice") as ModelViewerElement;
-    onLoad(modelViewer);
-    onScroll(modelViewer);
+    const cleanupLoad = onLoad(modelViewer, () => setModelReady(true));
+    const cleanupScroll = onScroll(modelViewer, setIsBlurred);
     onProgress(modelViewer);
+
+    return () => {
+      cleanupLoad?.();
+      cleanupScroll?.();
+    };
   }, []);
 
   const tooltip = <Tooltip id="tooltip">Play video</Tooltip>;
@@ -31,8 +42,14 @@ export const Alice = () => {
     setShow(true);
   };
 
+  const modelClassName = [
+    show ? "z-4" : "z-0",
+    modelReady ? "alice-ready" : "alice-loading",
+    isBlurred ? "blur" : "",
+  ].join(" ");
+
   return (
-    <div id="model" ref={aliceRef} className={show ? "z-4" : "z-0"}>
+    <div id="model" ref={aliceRef} className={modelClassName}>
       <model-viewer
         src={model}
         ar
@@ -42,6 +59,8 @@ export const Alice = () => {
         tone-mapping="neutral"
         poster={poster}
         id="alice"
+        loading="eager"
+        reveal="manual"
         camera-orbit="0deg 45deg 4m"
         animation-crossfade-duration="1000"
         environment-image="neutral"

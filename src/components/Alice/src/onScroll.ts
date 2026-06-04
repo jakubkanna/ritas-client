@@ -1,8 +1,11 @@
 import { ModelViewerElement } from "@google/model-viewer";
 
-export default function onScroll(modelViewer: ModelViewerElement | null) {
-  let hasLogged = false; // Flag to ensure 'bang' is logged only once
-  if (!modelViewer) return;
+export default function onScroll(
+  modelViewer: ModelViewerElement | null,
+  onBlurChange?: (isBlurred: boolean) => void
+) {
+  let isBlurred: boolean | null = null;
+  if (!modelViewer) return undefined;
 
   const onStart = () => {
     modelViewer.animationName = "Plane.003_final.001Action.003";
@@ -13,22 +16,26 @@ export default function onScroll(modelViewer: ModelViewerElement | null) {
     modelViewer.animationName = "rotation";
   };
 
-  window.addEventListener("scroll", () => {
-    // Get the current scroll position
+  const syncBlur = () => {
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    // Get the viewport height in pixels (100dvh is 100% of the viewport height)
     const viewportHeight = window.innerHeight;
     const breakpoint = viewportHeight / 100;
+    const shouldBlur = scrollTop >= breakpoint;
 
-    // Check if the scroll position is equal to or greater than 100dvh and 'bang' hasn't been logged yet
-    if (scrollTop >= breakpoint && !hasLogged) {
-      document.getElementById("model")?.classList.add("blur");
-      hasLogged = true; // Set the flag to true after logging
+    if (shouldBlur === isBlurred) return;
+
+    isBlurred = shouldBlur;
+    onBlurChange?.(shouldBlur);
+
+    if (shouldBlur) {
       onStart();
-    } else if (scrollTop < breakpoint && hasLogged) {
-      document.getElementById("model")?.classList.remove("blur");
-      hasLogged = false; // Reset the flag to false
+    } else {
       onStop();
     }
-  });
+  };
+
+  window.addEventListener("scroll", syncBlur);
+  syncBlur();
+
+  return () => window.removeEventListener("scroll", syncBlur);
 }

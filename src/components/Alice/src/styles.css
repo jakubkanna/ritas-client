@@ -3,8 +3,21 @@
 }
 
 model-viewer {
+  display: block;
   width: 100%;
   height: 100%;
+}
+
+#alice {
+  transition: opacity 0.2s ease-in-out;
+}
+
+#model.alice-loading #alice {
+  opacity: 0;
+}
+
+#model.alice-ready #alice {
+  opacity: 1;
 }
 
 .progress-bar {

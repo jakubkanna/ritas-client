@@ -2,18 +2,47 @@ import React, { useState } from "react";
 import ReactPlayer from "react-player/lazy";
 import { VideoRefSchema } from "@jakubkanna/labguy-front-schema";
 
+type VideoRefWithWordPressUrls = VideoRefSchema & {
+  embed_url?: unknown;
+  href?: unknown;
+  link?: unknown;
+  source_url?: unknown;
+  src?: unknown;
+  url?: unknown;
+};
+
+const getOptionalString = (
+  videoRef: VideoRefWithWordPressUrls,
+  key: keyof VideoRefWithWordPressUrls
+) => {
+  const value = videoRef[key];
+
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+};
+
 function getVideoUrl(videoRef: VideoRefSchema): string | null {
+  const ref = videoRef as VideoRefWithWordPressUrls;
   if (videoRef.yt_url) return videoRef.yt_url;
   if (videoRef.vimeo_url) return videoRef.vimeo_url;
   if (videoRef.sc_url) return videoRef.sc_url;
-  return null;
+
+  return (
+    getOptionalString(ref, "url") ||
+    getOptionalString(ref, "source_url") ||
+    getOptionalString(ref, "src") ||
+    getOptionalString(ref, "embed_url") ||
+    getOptionalString(ref, "href") ||
+    getOptionalString(ref, "link")
+  );
 }
 
 export default function Video({
   videoref,
+  className,
   playerProps = { playing: false, muted: false, controls: true, light: false },
 }: {
   videoref: VideoRefSchema;
+  className?: string;
   playerProps?: {
     playing?: boolean;
     muted?: boolean;
@@ -48,7 +77,7 @@ export default function Video({
   };
 
   return (
-    <div style={playerWrapperStyle}>
+    <div className={className} style={playerWrapperStyle}>
       {!ready && (
         <p className="position-absolute top-50 start-50 translate-middle text-dark">
           Loading...

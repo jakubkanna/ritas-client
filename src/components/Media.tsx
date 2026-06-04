@@ -13,10 +13,14 @@ export default function MediaComponent({ media, className }: MediaProps) {
   // Early return if no media is provided
   if (!media) return null;
 
+  const mediaClassName = ["media-block", className].filter(Boolean).join(" ");
+
   return (
     <Fade in={true} appear={true}>
-      <div className={className}>
-        {isImage(media) && <Image imageref={media} className={className} />}
+      <div className={mediaClassName}>
+        {isImage(media) && (
+          <Image imageref={media} className={className || "media-block__image"} />
+        )}
         {isVideo(media) && <Video videoref={media} />}
         {is3d(media) && <Model threedref={media} controls />}
         {!isImage(media) && !isVideo(media) && !is3d(media) && (

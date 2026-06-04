@@ -65,7 +65,7 @@ const WorkCard: React.FC<CardProps> = ({ work }) => {
       {mouveOver && (
         <Hover color={color}>
           <Link to={`${slug}`}>
-            <p className="pt-2 px-2">View</p>
+            <p className="m-0 px-2 fs-1 fw-light">View</p>
           </Link>
         </Hover>
       )}
